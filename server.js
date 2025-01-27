@@ -97,16 +97,16 @@ function determineIssue(vehicle) {
     return vehicle;
   }
 
-  if (!vehicle.hasIssue && Math.random() > 0.7) { // 30% chance a vehicle gets an issue
-    if (vehicle.attributes.batteryLevel < 20) issues.push("Low battery level");
-    if (vehicle.attributes.tirePressure < 28 || vehicle.attributes.tirePressure > 36) issues.push("Tire pressure out of range");
-    if (vehicle.attributes.temperature > 50) issues.push("Overheating");
-    if (!vehicle.attributes.regenerativeBraking) issues.push("Regenerative braking disabled");
+  if (!vehicle.hasIssue && Math.random() > 0.9) { // 10% chance a vehicle gets an issue
+    if (vehicle.attributes.batteryLevel < 15) issues.push("Low battery level");
+    if (vehicle.attributes.tirePressure < 26 || vehicle.attributes.tirePressure > 38) issues.push("Tire pressure out of range");
+    if (vehicle.attributes.temperature > 55) issues.push("Overheating");
+    if (!vehicle.attributes.regenerativeBraking && Math.random() > 0.5) issues.push("Regenerative braking disabled");
 
     if (issues.length > 0) {
       vehicle.hasIssue = true;
       vehicle.errorMessage = issues.join(", ");
-      vehicle.issueTimer = Math.floor(getRandomInRange(180, 240)); // Issue lasts for 3-4 minutes
+      vehicle.issueTimer = Math.floor(getRandomInRange(120, 180)); // Issue lasts for 2-3 minutes
     }
   } else if (vehicle.hasIssue) {
     // Ensure the error message is retained if vehicle still has an issue
@@ -123,18 +123,18 @@ function getRandomUpdate(vehicle, index) {
     ...vehicle,
     attributes: {
       ...vehicle.attributes,
-      speed: Math.max(10, Math.min(120, vehicle.attributes.speed + (Math.random() * 10 - 5))),
-      batteryLevel: Math.max(0, vehicle.attributes.batteryLevel - Math.random() * 1.5),
-      temperature: Math.max(15, Math.min(60, vehicle.attributes.temperature + (Math.random() * 2 - 1))),
-      tirePressure: Math.max(25, Math.min(40, vehicle.attributes.tirePressure + (Math.random() * 0.5 - 0.25))),
-      motorEfficiency: Math.max(70, Math.min(100, vehicle.attributes.motorEfficiency + (Math.random() * 0.5 - 0.25))),
-      regenerativeBraking: Math.random() > 0.1, // 10% chance to disable
-      oilLevel: Math.max(0, vehicle.attributes.oilLevel - Math.random() * 0.5),
-      brakeFluid: Math.max(0, vehicle.attributes.brakeFluid - Math.random() * 0.5),
-      coolantLevel: Math.max(0, vehicle.attributes.coolantLevel - Math.random() * 0.5),
-      fuelLevel: Math.max(0, vehicle.attributes.fuelLevel - Math.random() * 1),
-      engineLoad: Math.max(40, Math.min(90, vehicle.attributes.engineLoad + (Math.random() * 2 - 1))),
-      gpsAccuracy: Math.max(3, Math.min(15, vehicle.attributes.gpsAccuracy + (Math.random() * 0.2 - 0.1))),
+      speed: Math.max(15, Math.min(100, vehicle.attributes.speed + (Math.random() * 6 - 3))), // Moderate speed changes
+      batteryLevel: Math.max(10, vehicle.attributes.batteryLevel - Math.random() * 0.5), // Slower battery drain
+      temperature: Math.max(18, Math.min(50, vehicle.attributes.temperature + (Math.random() * 1.5 - 0.75))), // Slower temp variation
+      tirePressure: Math.max(28, Math.min(36, vehicle.attributes.tirePressure + (Math.random() * 0.3 - 0.15))), // Narrower range
+      motorEfficiency: Math.max(80, Math.min(95, vehicle.attributes.motorEfficiency + (Math.random() * 0.3 - 0.15))),
+      regenerativeBraking: Math.random() > 0.05, // 95% chance to remain enabled
+      oilLevel: Math.max(20, vehicle.attributes.oilLevel - Math.random() * 0.2), // Slower oil drain
+      brakeFluid: Math.max(20, vehicle.attributes.brakeFluid - Math.random() * 0.2), // Slower fluid drain
+      coolantLevel: Math.max(20, vehicle.attributes.coolantLevel - Math.random() * 0.2), // Slower coolant drain
+      fuelLevel: Math.max(10, vehicle.attributes.fuelLevel - Math.random() * 0.5), // Slower fuel consumption
+      engineLoad: Math.max(50, Math.min(85, vehicle.attributes.engineLoad + (Math.random() * 1.5 - 0.75))),
+      gpsAccuracy: Math.max(4, Math.min(12, vehicle.attributes.gpsAccuracy + (Math.random() * 0.2 - 0.1))),
     },
     position: path[vehicle.pathIndex],
     pathIndex:
@@ -149,6 +149,13 @@ function getRandomUpdate(vehicle, index) {
         : vehicle.pathDirection,
     status: vehicle.attributes.speed > 0 ? "moving" : "not", // Update status based on speed
   };
+
+  // Occasionally improve attributes for vehicles without issues
+  if (!updatedVehicle.hasIssue && Math.random() > 0.8) { // 20% chance of recovery
+    updatedVehicle.attributes.batteryLevel = Math.min(100, updatedVehicle.attributes.batteryLevel + Math.random() * 5);
+    updatedVehicle.attributes.tirePressure = Math.max(30, Math.min(35, updatedVehicle.attributes.tirePressure + Math.random() * 0.5));
+    updatedVehicle.attributes.coolantLevel = Math.min(100, updatedVehicle.attributes.coolantLevel + Math.random() * 1);
+  }
 
   return determineIssue(updatedVehicle);
 }
